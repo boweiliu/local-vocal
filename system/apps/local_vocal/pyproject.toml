@@ -1,0 +1,45 @@
+[project]
+name = "local-vocal"
+version = "0.1.0"
+description = "On-device voice in and out demo: Silero VAD + Moonshine ASR streaming transcription, and Kokoro TTS, all client-side in the browser."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "flask>=3.0",
+    "flask-sock>=0.7",
+    "werkzeug>=3.0",
+]
+
+[project.scripts]
+local-vocal = "local_vocal.runner:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/local_vocal"]
+
+# Run from this directory: `cd system/apps/local_vocal && uv run pytest`. The
+# tools (pytest, pytest-cov, pytest-timeout, inline-snapshot) come from the
+# workspace venv. The node-backed voice_session tests can take a moment on a cold
+# box, so the per-test timeout is generous (above the JS wrapper's own 120s).
+[tool.pytest.ini_options]
+testpaths = ["."]
+timeout_func_only = true
+addopts = [
+  "--cov=local_vocal",
+  "--cov-report=term-missing",
+  "--durations=10",
+  "--timeout=180",
+]
+
+[tool.coverage.run]
+omit = [
+  "*_test.py",
+  "test_*.py",
+  "*/conftest.py",
+]
+
+[tool.coverage.report]
+fail_under = 90

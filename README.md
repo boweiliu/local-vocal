@@ -1,52 +1,32 @@
-# Your workspace
+# Local-Vocal
 
-This folder is your mind's home: everything it knows, everything it builds,
-and the machinery that keeps it running.
+On-device VAD, live streaming speech-to-text, and text-to-speech in the browser -- no API key, no server round-trip.
 
-## Creations
+Local-Vocal is a self-contained, client-side-only browser component for on-device
+voice **in** and voice **out** -- no API key, no server round-trip, no cloud
+transcription. You speak and your words appear as a live caption and as cleanly
+finalized turns (for utterances of any length); you hand it text and it speaks the
+text aloud. Speech detection (Silero VAD), streaming transcription (Moonshine
+ASR), and text-to-speech (Kokoro) all run inside the browser via
+WebAssembly/WebGPU, with the models fetched once from public CDNs and cached
+locally. The reusable core is two DOM-free modules -- `voice_session.js` (the
+streaming transcription model) and `voice_capture.js` (the `window.LocalVocal`
+driver) -- with a small Flask app that serves a demo page to show them off.
 
-Broadly, in Minds you make "creations". These can be "code" (apps, skills, and
-the services behind them) or "data" (documents, images, notes).
+This repository is a published **minds inspiration**: a clean, bootable
+snapshot of the apps and features a mind built, ready to adapt into your own.
+It is NOT the generic workspace template -- it is this specific project.
 
-Minds makes this easier by defining some conventions for the common things
-you'll want to make:
+## Use it
 
-1. an "app" - something you can open as a tab and interact with
-2. a "skill" - teaches your mind how to do work you care about. A skill that
-   is automatically run on a schedule is called an "automation" (the
-   machinery that runs them lives in `system/libs/automations/`; the weekly
-   Caretaker is the built-in example)
-3. some "data" - documents, images, notes, or data created by your apps and
-   skills
-4. some "customizations" - changes to any of the above. Everything in Minds
-   can be modified by you!
+- **Create a new mind from it:** point a new minds workspace at this repo's
+  URL. On first boot the mind reads the inspiration and helps you connect your
+  own accounts and adapt it.
+- **Bring it into an existing mind:** run `/use-inspiration <this repo's URL>`.
 
-## What's here
+## What's inside
 
-- `apps/` - Everything you can open as a tab: the built-in apps (the
-  terminal, the browser) and the apps your mind builds for you. (A shortcut
-  to `system/apps/`.)
-- `skills/` - Everything your mind knows how to do: the built-in skills and
-  the ones it has learned for you. (A shortcut to `.agents/skills/`.)
-- `data/` - Your workspace's data: documents and project folders, files
-  you've uploaded, your mind's memories, and each app's stored data.
-- `docs/` - Guides to this workspace: what it is, how it works, and a history
-  of where it came from.
-- `system/` - The machinery that runs the workspace: the apps themselves,
-  background services, scripts, and configuration. You can look around (every
-  folder has a README), and your mind maintains it for you.
+- **Local-Vocal** -- [`inspiration-local-vocal.md`](inspiration-local-vocal.md) (published now)
 
-A few housekeeping files live alongside them:
-
-- `README.md` - This file.
-- `CLAUDE.md` - The standing instructions your mind follows.
-- `pyproject.toml` and `uv.lock` - The Python project definition; the tooling
-  requires them at the top level.
-
-## Where things are kept safe
-
-The workspace is a git repository: code and configuration changes are
-committed as your mind works. Everything under `data/` is deliberately kept
-out of git (it can be large, personal, or both) and is protected by the
-workspace's continuous encrypted backup instead, along with the rest of the
-workspace. See `docs/` for details.
+Each `inspiration-<slug>.md` is the full manifest for that inspiration: what
+it is, how it works, the prerequisites it needs, and how to adapt it.

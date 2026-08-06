@@ -17,6 +17,7 @@ dependencies = [
     "litellm>=1.88.1",
     "browser",
     "eval-worker",
+    "local-vocal",
 ]
 
 [dependency-groups]
@@ -76,6 +77,7 @@ mngr-cli-contract = { workspace = true }
 tk-command-parsing = { workspace = true }
 oom-priority = { workspace = true }
 browser = { workspace = true }
+local-vocal = { workspace = true }
 imbue-common = { path = "system/vendor/mngr/libs/imbue_common", editable = true }
 imbue-mngr = { path = "system/vendor/mngr/libs/mngr", editable = true }
 imbue-mngr-claude = { path = "system/vendor/mngr/libs/mngr_claude", editable = true }
@@ -114,6 +116,8 @@ addopts = [
     # system/apps/system_interface has its own pytest config (coverage, slow-test reporting,
     # ratchets) that conflicts with the root config; it is run from inside its own dir.
     "--ignore=system/apps/system_interface",
+    # local_vocal carries its own pytest/coverage config; run from inside its dir.
+    "--ignore=system/apps/local_vocal",
     # The top-level apps and skills symlinks (discoverability shortcuts to
     # system/apps/ and .agents/skills/) would otherwise make pytest collect
     # every test under them a second time via the symlink path.

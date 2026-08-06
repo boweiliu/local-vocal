@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Local-Vocal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&family=Saira+Stencil+One&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink:#1e242b; --ink-soft:#525a64; --ink-muted:#6b7682; --hairline:#c4ccd4;
+    --surface:#fbfcfd; --surface-sunken:#eef1f5; --surface-edge:#cdd3db;
+    --surface-raised-top:#fdfefe; --surface-raised-bottom:#e6eaef;
+    --accent:#d3b451; --accent-deep:#a5842c; --accent-light:#efdc86; --accent-edge:#6f5a1f; --sheen:#cdd694;
+    --listening:#4f9d78; --listening-facet:#7cc0a0; --speaking:#a75c86; --speaking-facet:#c98fb0;
+    --serif:"Newsreader",Georgia,"Times New Roman",serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --level:0; --maxw:680px;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; color: var(--ink); font-family: var(--serif); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+    display: flex; flex-direction: column; min-height: 100dvh; overflow: hidden;
+    background: repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 4px), linear-gradient(135deg,#d9dde3 0%,#c5cbd3 24%,#e4e8ed 50%,#c0c7cf 76%,#d7dbe1 100%);
+    background-size: 6px 100%, 320% 320%; background-attachment: fixed; animation: drift 22s ease-in-out infinite alternate; }
+  @keyframes drift { 0% { background-position: 0 0, 0% 50%; } 100% { background-position: 0 0, 100% 50%; } }
+
+  .navbar { display: flex; align-items: center; gap: 16px; padding: 13px clamp(1.2rem, 4vw, 26px); flex: 0 0 auto;
+    border-bottom: 1px solid #a7b3c1; background: linear-gradient(180deg,var(--surface-raised-top),var(--surface-raised-bottom)); }
+  .brand { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+  .brand h1 { font-family: var(--serif); font-weight: 500; font-size: 21px; margin: 0; white-space: nowrap; }
+  .brand h1 em { font-style: italic; color: #6f7b8a; }
+  .brand .sub { font-family: var(--mono); font-size: 11px; color: var(--ink-muted); letter-spacing: .04em; white-space: nowrap; }
+  .spacer { flex: 1 1 auto; }
+  .status-pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-muted); white-space: nowrap; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #d4dae1; transition: background .3s; }
+  body[data-state="listening"] .status-dot { background: var(--listening); animation: pulse 1.6s ease-in-out infinite; }
+  body[data-state="speaking"] .status-dot { background: var(--speaking); }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
+  main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; align-items: center;
+    margin: clamp(.9rem, 3vh, 1.4rem) clamp(1rem, 4vw, 26px); padding: clamp(1rem, 3vh, 1.8rem) clamp(1rem, 4vw, 2rem);
+    border: 1px solid var(--surface-edge); border-radius: 4px; background: var(--surface); box-shadow: 0 1px 0 #fff inset, 0 10px 30px rgba(40,50,60,.10);
+    position: relative; overflow: hidden; }
+  main::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; border-radius: 4px 0 0 4px;
+    background: linear-gradient(180deg, var(--accent-light), var(--sheen) 42%, var(--accent) 70%, var(--accent-deep)); }
+
+  .indicator { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; }
+  .pool { position: relative; width: clamp(120px, 20vmin, 168px); aspect-ratio: 1; display: grid; place-items: center; cursor: pointer;
+    --glow: var(--accent-light); --deep: var(--accent-deep); }
+  body:not([data-ready]) .pool { cursor: progress; opacity: .55; }
+  body[data-state="speaking"] .pool { --glow: var(--speaking-facet); --deep: var(--speaking); }
+  .orb-label { position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center; text-align: center; pointer-events: none;
+    font-family: "Saira Stencil One", var(--mono); text-transform: uppercase; letter-spacing: .1em; line-height: 1.0;
+    font-size: clamp(.85rem, 2.6vmin, 1.15rem); color: #4a3a12; text-shadow: 0 1px 0 rgba(255,255,255,.5), 0 -1px 1px rgba(46,34,6,.5); }
+  .ripple { position: absolute; inset: 0; margin: auto; border-radius: 50%; border: 1px solid color-mix(in oklab, var(--glow) 50%, transparent); opacity: 0; animation: ripple 4.2s ease-out infinite; }
+  .ripple:nth-child(2) { animation-delay: 1.4s; }
+  .ripple:nth-child(3) { animation-delay: 2.8s; }
+  @keyframes ripple { 0% { transform: scale(.7); opacity: .5; } 100% { transform: scale(2.6); opacity: 0; } }
+  .orb { position: relative; width: 58%; aspect-ratio: 1; border-radius: 50%;
+    background: radial-gradient(circle at 36% 30%, #ffffff 0%, var(--glow) 32%, var(--deep) 76%, color-mix(in oklab, var(--deep) 68%, #10131a) 100%);
+    box-shadow: 0 0 26px color-mix(in oklab, var(--glow) 45%, transparent), 0 8px 22px rgba(38,60,110,.28);
+    transform: scale(calc(1 + var(--level) * 0.42)); transition: transform .08s ease-out, background .6s ease; animation: breathe 5.5s ease-in-out infinite; }
+  @keyframes breathe { 0%, 100% { filter: brightness(.96); } 50% { filter: brightness(1.06); } }
+  .studio-status { flex: 0 0 auto; min-height: 1.1em; margin-top: .5rem; font-family: var(--mono); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-muted); }
+
+  .caption { flex: 0 0 auto; width: 100%; max-width: var(--maxw); min-height: 2.6em; margin-top: clamp(.6rem, 2vh, 1rem);
+    text-align: center; font-size: clamp(1.15rem, 3.2vw, 1.5rem); line-height: 1.5; }
+  .caption .committed { color: var(--ink); }
+  .caption .tentative { color: var(--ink-muted); }
+  .caption .hint { color: #8a95a1; font-style: italic; }
+
+  .turns-wrap { flex: 1 1 auto; min-height: 0; width: 100%; max-width: var(--maxw); display: flex; flex-direction: column; margin-top: clamp(.8rem, 2.5vh, 1.4rem); }
+  .turns-head { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: .5rem; }
+  .turns { flex: 1 1 auto; min-height: 0; overflow-y: auto; border-top: 1px solid var(--hairline); padding-top: .6rem;
+    scrollbar-width: thin; scrollbar-color: #d4dae1 transparent; }
+  .turn { margin: 0 0 .7rem; font-size: clamp(1rem, 2.3vw, 1.1rem); line-height: 1.6; color: var(--ink); }
+  .turn .row { display: flex; align-items: flex-start; gap: .6rem; }
+  .turn .text { flex: 1 1 auto; }
+  .turn audio { flex: 0 0 auto; height: 28px; margin-top: 2px; }
+  .turns-empty { color: #8a95a1; font-style: italic; font-size: 1rem; }
+
+  .speak-bar { flex: 0 0 auto; width: 100%; max-width: var(--maxw); display: flex; gap: .6rem; align-items: stretch;
+    padding-top: clamp(.8rem, 2vh, 1.1rem); margin-top: .4rem; border-top: 1px solid var(--hairline); }
+  .speak-input { flex: 1 1 auto; min-width: 0; font-family: var(--serif); font-size: 1rem; color: var(--ink);
+    background: var(--surface); border: 1px solid var(--surface-edge); border-radius: 4px; padding: .6rem .8rem; }
+  .speak-input:focus { outline: 2px solid var(--accent-deep); outline-offset: 1px; }
+  .btn { appearance: none; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
+    border-radius: 4px; padding: .6rem 1.1rem; transition: filter .15s ease, border-color .15s ease, background .15s ease; }
+  .btn-primary { border: 1px solid var(--accent-edge); color: #3a2c08;
+    background: linear-gradient(180deg, var(--accent-light), var(--accent) 55%, var(--accent-deep)); box-shadow: 0 1px 0 rgba(255,255,255,.5) inset; }
+  .btn-primary:hover { filter: brightness(1.06); }
+  .btn-ghost { border: 1px solid var(--surface-edge); color: var(--ink-soft); background: linear-gradient(180deg,var(--surface-raised-top),var(--surface-raised-bottom)); }
+  .btn-ghost:hover { border-color: var(--accent-deep); color: var(--ink); }
+  .btn[disabled] { opacity: .5; cursor: default; filter: none; }
+  :focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 3px; border-radius: 3px; }
+
+  .notice { position: fixed; left: 50%; bottom: 1rem; transform: translateX(-50%);
+    background: linear-gradient(180deg,var(--surface-raised-top),var(--surface-raised-bottom)); border: 1px solid var(--surface-edge); color: var(--ink-soft);
+    font-family: var(--mono); font-size: 11px; padding: .6rem 1rem; border-radius: 4px; max-width: 90vw; text-align: center; opacity: 0; pointer-events: none;
+    transition: opacity .4s ease; box-shadow: 0 4px 14px rgba(40,50,60,.15); }
+  .notice.show { opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) { body { animation: none; } .orb { animation: none; } .ripple { animation: none; opacity: .18; } .status-dot { animation: none !important; } }
+  @media (max-width: 560px) { main { margin: 0 .6rem .6rem; padding: .9rem .8rem; } .speak-bar { flex-wrap: wrap; } }
+</style>
+</head>
+<body data-state="idle">
+  <header class="navbar">
+    <div class="brand">
+      <h1>Local<em>-Vocal</em></h1>
+      <span class="sub">on-device voice in &amp; out</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="status-pill"><span class="status-dot"></span><span id="statusPill">loading</span></div>
+  </header>
+
+  <main>
+    <div class="indicator">
+      <div class="pool" id="micBtn" role="button" tabindex="0" aria-label="Start listening">
+        <div class="ripple"></div><div class="ripple"></div><div class="ripple"></div>
+        <div class="orb" id="orb"></div>
+        <div class="orb-label" id="orbLabel">Listen</div>
+      </div>
+      <div class="studio-status" id="statusLabel">Loading voice model…</div>
+    </div>
+
+    <div class="caption" id="caption"><span class="hint">Your words will appear here as you speak.</span></div>
+
+    <div class="turns-wrap">
+      <div class="turns-head">Finalized turns</div>
+      <div class="turns" id="turns" aria-live="polite"><p class="turns-empty" id="turnsEmpty">Nothing captured yet.</p></div>
+    </div>
+
+    <div class="speak-bar">
+      <input type="text" id="speakInput" class="speak-input" placeholder="Type something and Local-Vocal will say it aloud…" autocomplete="off" />
+      <button class="btn btn-primary" id="speakBtn">Speak</button>
+      <button class="btn btn-ghost" id="stopSpeakBtn">Stop</button>
+    </div>
+  </main>
+
+  <div class="notice" id="notice"></div>
+
+<!-- The DOM-free voice model (StreamingTurn, Transcript, and the text helpers).
+     Inlined at serve time; exposes the global VoiceSession. -->
+<script src="voice_session.js"></script>
+<!-- The reusable driver (VAD + ASR worker + StreamingTurn wiring + Kokoro TTS).
+     Inlined at serve time; exposes the global LocalVocal and reads VoiceSession. -->
+<script src="voice_capture.js"></script>
+<script>
+/* The demo page: it owns the DOM and does nothing else. All voice logic lives in
+   LocalVocal (voice_capture.js) over the on-device model (voice_session.js). This
+   file only starts/stops listening, renders the callbacks it gets back, and
+   drives the "type text and speak it" control. */
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const body = document.body;
+  const micBtn = $("micBtn"), orb = $("orb"), orbLabel = $("orbLabel");
+  const caption = $("caption"), turns = $("turns"), statusLabel = $("statusLabel"), statusPill = $("statusPill");
+  const speakInput = $("speakInput"), speakBtn = $("speakBtn"), stopSpeakBtn = $("stopSpeakBtn"), notice = $("notice");
+  const LV = window.LocalVocal;
+
+  let ready = false, listening = false, handle = null;
+  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  function flashNotice(t) { notice.textContent = t; notice.classList.add("show"); setTimeout(() => notice.classList.remove("show"), 5200); }
+
+  // ---- loading state ----
+  function onStatus(status, detail) {
+    statusPill.textContent = status === "loading" && detail ? "loading " + detail : status;
+    if (status === "ready") {
+      ready = true; body.dataset.ready = "1"; statusLabel.textContent = "Tap the orb to talk"; orbLabel.textContent = "Listen";
+    } else if (status === "loading") {
+      statusLabel.textContent = detail ? "Loading voice model " + detail + "…" : "Loading voice model…";
+    } else if (status === "error") {
+      statusLabel.textContent = "Voice model error";
+    }
+  }
+
+  // ---- live caption ----
+  function renderCaption(stable, tentative) {
+    if (!stable && !tentative) {
+      caption.innerHTML = listening ? '<span class="hint">Listening…</span>' : '<span class="hint">Your words will appear here as you speak.</span>';
+      return;
+    }
+    caption.innerHTML = '<span class="committed">' + esc(stable) + "</span>" +
+      (tentative ? ' <span class="tentative">' + esc(tentative) + "</span>" : "");
+  }
+
+  // ---- finalized turns (each keeps its exact captured audio, the raw record) ----
+  function addTurn(text, wavBlob) {
+    const empty = $("turnsEmpty"); if (empty) empty.remove();
+    const p = document.createElement("p"); p.className = "turn";
+    const row = document.createElement("div"); row.className = "row";
+    const span = document.createElement("span"); span.className = "text"; span.textContent = text;
+    row.appendChild(span);
+    if (wavBlob) {
+      const audio = document.createElement("audio");
+      audio.controls = true; audio.preload = "none"; audio.src = URL.createObjectURL(wavBlob);
+      row.appendChild(audio);
+    }
+    p.appendChild(row);
+    turns.appendChild(p);
+    turns.scrollTop = turns.scrollHeight;
+  }
+
+  // ---- listen toggle ----
+  function startListening() {
+    if (!ready) { flashNotice("The voice model is still loading — one moment."); return; }
+    listening = true; body.dataset.state = "listening"; orbLabel.textContent = "Live"; statusLabel.textContent = "Listening — just talk";
+    renderCaption("", "");
+    handle = LV.listen({
+      onCaption: renderCaption,
+      onTurn: addTurn,
+      onLevel: (l) => orb.style.setProperty("--level", l.toFixed(3)),
+      onError: (err) => flashNotice(String(err && err.message ? err.message : err)),
+    });
+  }
+  function stopListening() {
+    listening = false; body.dataset.state = "idle"; orbLabel.textContent = "Listen"; statusLabel.textContent = "Tap the orb to talk";
+    orb.style.setProperty("--level", 0);
+    if (handle) { handle.stop(); handle = null; }
+    renderCaption("", "");
+  }
+  function toggleListen() { if (listening) stopListening(); else startListening(); }
+
+  micBtn.addEventListener("click", toggleListen);
+  micBtn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleListen(); } });
+
+  // ---- speak (voice OUT) ----
+  async function doSpeak() {
+    const text = speakInput.value.trim();
+    if (!text) { speakInput.focus(); return; }
+    speakBtn.disabled = true; const prev = body.dataset.state; body.dataset.state = "speaking";
+    try { await LV.speak(text); }
+    catch (err) { flashNotice("Couldn't speak: " + err); }
+    finally { speakBtn.disabled = false; body.dataset.state = listening ? "listening" : "idle"; }
+  }
+  speakBtn.addEventListener("click", doSpeak);
+  speakInput.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); doSpeak(); } });
+  stopSpeakBtn.addEventListener("click", () => { LV.stopSpeaking(); if (!listening) body.dataset.state = "idle"; });
+
+  // Kick off model loading immediately so the orb lights up as soon as it's ready.
+  LV.init({ onStatus });
+})();
+</script>
+</body>
+</html>
