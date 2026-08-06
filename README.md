@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" alt="Local-Vocal" width="480">
+</p>
+
 # Local-Vocal
 
 On-device VAD, live streaming speech-to-text, and text-to-speech in the browser -- no API key, no server round-trip.
