@@ -1,0 +1,5 @@
+{
+  "//": "These assets are plain browser scripts, and voice_session.js doubles as a CommonJS module so `node --test` can exercise it (voice_session.test.mjs requires it). The nearest package.json above this directory is system/package.json, the npm workspace root for the frontends, which declares \"type\": \"module\" -- that would make node load every .js here as an ES module, where `module` and `this` are both undefined and the file's UMD tail throws. Pinning commonjs here scopes that declaration back to what these files actually are. It is not an npm package: system/package.json lists its workspaces explicitly and does not include this path.",
+  "type": "commonjs",
+  "private": true
+}
