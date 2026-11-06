@@ -3,7 +3,7 @@ name = "local-vocal"
 version = "0.1.0"
 description = "On-device voice in and out demo: Silero VAD + Moonshine ASR streaming transcription, and Kokoro TTS, all client-side in the browser."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "flask>=3.0",
     "flask-sock>=0.7",
@@ -20,9 +20,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/local_vocal"]
 
-# Run from this directory: `cd system/apps/local_vocal && uv run pytest`. The
-# tools (pytest, pytest-cov, pytest-timeout, inline-snapshot) come from the
-# workspace venv. The node-backed voice_session tests can take a moment on a cold
+# Run from this directory: `cd system/apps/local_vocal && uv run --no-sync pytest`. The
+# tools (pytest, pytest-cov, pytest-timeout, inline-snapshot) come from this app's
+# own venv (its dev group). The node-backed voice_session tests can take a moment on a cold
 # box, so the per-test timeout is generous (above the JS wrapper's own 120s).
 [tool.pytest.ini_options]
 testpaths = ["."]
@@ -43,3 +43,17 @@ omit = [
 
 [tool.coverage.report]
 fail_under = 90
+
+[dependency-groups]
+dev = [
+    "imbue-common[testing]",
+    "pytest-cov==7.1.0",
+    "pytest-timeout==2.4.0",
+    "ty==0.0.85",
+]
+
+[tool.uv.sources]
+imbue-common = { git = "https://github.com/imbue-ai/mngr", rev = "e6ab2a4966f46511e9a45bb762c47a2aa36858c6", subdirectory = "libs/imbue_common" }
+
+# Makes this directory ty's project; without a [tool.ty] table ty keeps searching upward.
+[tool.ty]

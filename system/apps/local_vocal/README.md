@@ -98,7 +98,7 @@ via WebAssembly / WebGPU. The server never sees audio or text.
 ## Tests
 
 ```bash
-cd system/apps/local_vocal && uv run pytest
+cd system/apps/local_vocal && uv run --no-sync pytest
 ```
 
 Runs the ratchets, the route tests, and the 18 `node --test` model invariants
